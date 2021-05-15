@@ -8,7 +8,9 @@ This repository will hold a series of lessons developed to help people who want 
 
 Introduction to core service
 
-### 20-May
+### 20-May: Lesson 02
+
+Introduction to Serverless
 
 
 ## Topics for Richard to consider
@@ -28,6 +30,6 @@ Introduction to core service
 
 - Check on the [videos](https://events.linuxfoundation.org/cloud-native-rust-day/) after 14-May. [YT](https://www.youtube.com/c/cloudnativefdn/playlists)
 - [proc macros](https://blog.turbo.fish/proc-macro-simple-derive/)
-- [proc macrosL: basics](https://blog.turbo.fish/proc-macro-basics/)
+- [proc macros: basics](https://blog.turbo.fish/proc-macro-basics/)
 - [static dispatch](https://www.youtube.com/watch?v=tM2r9HD4ivQ)
 - Look at these [sweet sweet comments](https://github.com/tokio-rs/mini-redis/blob/master/src/server.rs)
