@@ -376,3 +376,219 @@ rm -rf ./tests
 ```
 
 Now we've broken the application, fixing it is left as an exercise for the reader.
+
+----
+
+Just kidding, I wouldn't do that to you.
+
+Let's go ahead and make this application a bit rusty.
+From the root of the project folder (🗑🔥) create the `Cargo.toml` file and the `src/` folder.
+Usually we would just use `cargo new ...` but we already have the folder created and I don't know how to create a create in the current directory.
+
+```bash
+touch Cargo.toml
+mkdir src
+touch src/main.rs
+```
+
+Let's walk through the `Cargo.toml` file first.
+
+```toml
+[package]
+name = "hello-world-lambda-function"
+version = "0.1.0"
+edition = "2018"
+```
+
+You know this part, it's the usual `[package]` information
+
+```toml
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0.82", features = ["derive"] }
+serde_json = { version = "1.0.33", features = ["raw_value"] }
+
+lambda_runtime = "0.3"
+```
+We're going to include the [Rust Runtime for AWS Lambda](https://github.com/awslabs/aws-lambda-rust-runtime).
+This runtime has convenience helpers that will do some Rust stuff I don't fully understand.
+
+```toml
+[[bin]]
+name = "bootstrap"
+path = "src/main.rs"
+```
+
+Finally, we need to complete our ceremony by packaging our Rust binary in a very specific way.
+If you don't get this incantation just right, it will not work and it will be all your fault.
+There's no way we could possibly make this easier.
+
+Because Rust is not an Officially Supported Runtime™ by the AWS Lambda service, we have to use a mechanism known as [~~just use a real language instead~~ Custom Runtimes](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html).
+The short version of that doc page is that you a file named `bootstrap` that is executable that will be executed to invoke the logic of your function.
+In officially supported runtimes, such as Python, the Lambda service will know how to invoke the logic of your Lambda function.
+In custom runtimes, we have to tell the Lambda service how to do this.
+The contract is that we will put these instructions in a file named `bootstrap` and Lambda will execute it when the function is invoked.
+
+We'll use Cargo's ability to specify a binary name to avoid having to manually rename the file.
+If you're not using Cloud9, you're about to get a crash course in cross-compiling.
+The custom runtime environment uses Amazon Linux 2 and we're, hopefully, also using AL2 in Cloud9 so there shouldn't be a need to compile for the Lambda OS, but if you're on a Mac or some other linux variant ... good luck.
+The original Rust Runtime for AWS Lambda [blog post](https://aws.amazon.com/blogs/opensource/rust-runtime-for-aws-lambda/) has a good overview of the steps needed.
+
+Now we'll get to the Rust code:
+
+```rust
+use lambda_runtime::{handler_fn, Context};
+use serde::{Deserialize, Serialize};
+
+pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
+
+#[derive(Deserialize)]
+struct Request {
+    path: String,
+}
+
+#[derive(Serialize)]
+struct Response {
+    body: ResponseBody,
+    // This should be a u32, but API Gateway actually expects a String that looking like an int for some reason.
+    statusCode: String
+}
+
+#[derive(Serialize)]
+struct ResponseBody {
+    hello: String
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let func = handler_fn(my_handler);
+    lambda_runtime::run(func).await?;
+    Ok(())
+}
+
+pub(crate) async fn my_handler(event: Request, ctx: Context) -> Result<Response, Error> {
+
+    let resp = Response {
+        body: ResponseBody {hello: String::from("world")},
+        statusCode: String::from("200")
+    };
+
+    Ok(resp)
+}
+```
+Next we will tell the SAM CLI how to build our application.
+Create a `Makefile`
+
+`touch Makefile`
+
+Add the following contents.
+This will tell SAM how to build our application and place it in the right directory for deployment.
+
+```text
+build-HelloRustFunction:
+	cargo build --release
+	cp ./target/release/bootstrap $(ARTIFACTS_DIR)
+```
+
+> Note: those are tabs and not spaces
+
+Our last change is to update our CloudFormation template to reflect our new runtime.
+Before we start making changes, your template should look something like this.
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  🗑🔥
+
+  Sample SAM Template for 🗑🔥
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello_world/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello
+            Method: get
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
+```
+
+Update the template with these values.
+The options that will need to be changed are:
+- `CodeUri`
+- `Runtime`
+- `Metadata`
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  🗑🔥
+
+  Sample SAM Template for 🗑🔥
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+        BuildMethod: makefile
+    Properties:
+      Handler: app.lambda_handler # this value no longer matters, but it needs to be present because APIs are hard
+      Runtime: provided.al2
+      CodeUri: .
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello
+            Method: get
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
+```
+
+We should now be able to build this application and deploy it.
+Running `sam build` will build the Rust application and prepare it for packaging and deployment.
+Running `sam deploy` will deploy it with the options we used last time, by reading the options from the `samconfig.toml` file.
+
+> Note: this will delpoy but attempting to invoke it will fail with `{"message": "Internal server error"}` because the response from our function is not quite right.
+We are returning a literal string `{"hello":"world"}` but what we actually need to return is something like `{"body": "{\"hello\":\"world\"}","statusCode": 200}`
