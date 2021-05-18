@@ -364,7 +364,6 @@ Inside the 🗑🔥 directory we have the follwoing files/folders
     └───unit
         │   __init__.py
         │   test_harness.py
-
 ```
 
 Delete the following Python related files/folders:
@@ -591,4 +590,7 @@ Running `sam build` will build the Rust application and prepare it for packaging
 Running `sam deploy` will deploy it with the options we used last time, by reading the options from the `samconfig.toml` file.
 
 > Note: this will delpoy but attempting to invoke it will fail with `{"message": "Internal server error"}` because the response from our function is not quite right.
-We are returning a literal string `{"hello":"world"}` but what we actually need to return is something like `{"body": "{\"hello\":\"world\"}","statusCode": 200}`
+We are returning a literal string `{"hello":"world"}` but what we actually need to return is something like `{"body": "{\"hello\":\"world\"}","statusCode": 200}`.
+I can't figure out how to do this without writing a boat load of Serialization logic so hopefully someone else knows some Rust tricks.
+
+//TODO catch all the API Gateway paths by using the `{proxy+}` route
