@@ -25,6 +25,7 @@ Introduction to Serverless
 - VSCode extension with Rust (using WASM?)
 - [Sending email with AWS SES](https://kerkour.com/blog/rust-send-email/)
 - OpenStreetMap that calculates the route between two points. [inspiration](https://blogg.bekk.no/building-an-openstreetmap-app-in-rust-part-i-2adf72c75229)
+- Rust [HID controller](https://crates.io/crates/hidapi) for Elgato Streamdeck
 
 ## Errata
 
