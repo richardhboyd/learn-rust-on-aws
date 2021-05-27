@@ -341,7 +341,7 @@ We'll start with the conversion to Rust
 
 ## Adding Rust
 
-Inside the 🗑🔥 directory we have the follwoing files/folders
+Inside the 🗑🔥 directory we have the following files/folders
 
 ```
 🗑🔥
