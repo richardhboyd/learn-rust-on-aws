@@ -430,7 +430,7 @@ If you don't get this incantation just right, it will not work and it will be al
 There's no way we could possibly make this easier.
 
 Because Rust is not an Officially Supported Runtime™ by the AWS Lambda service, we have to use a mechanism known as [~~just use a real language instead~~ Custom Runtimes](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html).
-The short version of that doc page is that you a file named `bootstrap` that is executable that will be executed to invoke the logic of your function.
+The short version of that doc page is that you must create a file named `bootstrap` that is executable that will be executed to invoke the logic of your function.
 In officially supported runtimes, such as Python, the Lambda service will know how to invoke the logic of your Lambda function.
 In custom runtimes, we have to tell the Lambda service how to do this.
 The contract is that we will put these instructions in a file named `bootstrap` and Lambda will execute it when the function is invoked.
@@ -596,7 +596,7 @@ We should now be able to build this application and deploy it.
 Running `sam build` will build the Rust application and prepare it for packaging and deployment.
 Running `sam deploy` will deploy it with the options we used last time, by reading the options from the `samconfig.toml` file.
 
-> Note: this will delpoy but attempting to invoke it will fail with `{"message": "Internal server error"}` because the response from our function is not quite right.
+> Note: this will deploy but attempting to invoke it will fail with `{"message": "Internal server error"}` because the response from our function is not quite right.
 We are returning a literal string `{"hello":"world"}` but what we actually need to return is something like `{"body": "{\"hello\":\"world\"}","statusCode": 200}`.
 I can't figure out how to do this without writing a boat load of Serialization logic so hopefully someone else knows some Rust tricks.
 
