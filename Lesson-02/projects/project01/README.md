@@ -484,7 +484,7 @@ Add the following contents.
 This will tell SAM how to build our application and place it in the right directory for deployment.
 
 ```text
-build-HelloRustFunction:
+build-HelloWorldFunction:
 	cargo build --release
 	cp ./target/release/bootstrap $(ARTIFACTS_DIR)
 ```
