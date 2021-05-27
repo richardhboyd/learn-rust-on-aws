@@ -9,6 +9,13 @@ The Serverless Application Model CLI should already be installed and configured 
 We can check this by running `sam --version` in the terminal.
 If you get an error, yell at Timir Karia.
 
+We'll need to install Rust before we can use it.
+
+```bash
+curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
+source $HOME/.cargo/env`
+```
+
 Because the tech industry can't standardize on if a CLI should create a new folder in the current directory and initialize the new project in that folder or if the CLI should initialize the new project in the current directory, we're going to YOLO it and jsut run the `init` command from the root of our environment.
 
 ```text
