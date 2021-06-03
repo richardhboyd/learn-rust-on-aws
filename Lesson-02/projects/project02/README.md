@@ -275,6 +275,7 @@ Resources:
             Path: /functions
             Method: get
       Policies:
+      - Statement:
         - Sid: ListFunctionsPolicy
           Effect: Allow
           Action:
@@ -295,6 +296,7 @@ Resources:
             Path: /tables
             Method: get
       Policies:
+      - Statement:
         - Sid: ListTablessPolicy
           Effect: Allow
           Action:
