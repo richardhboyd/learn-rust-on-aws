@@ -12,6 +12,10 @@ Introduction to core service
 
 Introduction to Serverless
 
+### 10-June: Lesson 03
+
+Rust functions with CDK
+
 
 ## Topics for Richard to consider
 
