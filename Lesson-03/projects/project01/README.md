@@ -236,13 +236,13 @@ class Project01Stack(cdk.Stack):
 
         function_reference = lambdaFn = lambda_.Function(
             self, "Singleton",
-            code=lambda_.Code.fromAsset('./my-example-function/out'),
+            code=lambda_.Code.from_asset('./my-example-function/out'),
             handler="index.main",
             runtime=lambda_.Runtime.PROVIDED_AL2,
         )
 ```
 
-Note that the `code` parameter is `lambda_.Code.fromAsset('./my-example-function/out')`, which means that we're telling CDK to grab the contents of a directory, zip it up, and use that as the function's 'code artifact'.
+Note that the `code` parameter is `lambda_.Code.from_asset('./my-example-function/out')`, which means that we're telling CDK to grab the contents of a directory, zip it up, and use that as the function's 'code artifact'.
 If we hadn't used the `out-dir` feature, we would have had to either (a) point to the `target/release/` directory which would bring all of the build artifacts with it or (b) manually move the `bootstrap` executable to a new directory.
 Using `out-dir` helps us avoid having to do that my telling Cargo to move the executable for us.
 
