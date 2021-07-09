@@ -166,18 +166,24 @@ path = "src/main.rs"
 ```rust
 use lambda_runtime::{handler_fn, Context};
 use serde::{Deserialize, Serialize};
+// use serde_json::Result;
 
 pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
 #[derive(Deserialize)]
+struct APIRequest {
+    body: String,
+}
+
+#[derive(Serialize, Deserialize)]
 struct Request {
     command: String,
 }
 
 #[derive(Serialize)]
 struct Response {
-    req_id: String,
-    msg: String,
+    statusCode: String,
+    body: String,
 }
 
 #[tokio::main]
@@ -187,12 +193,13 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 
-pub(crate) async fn my_handler(event: Request, ctx: Context) -> Result<Response, Error> {
-    let command = event.command;
+pub(crate) async fn my_handler(event: APIRequest, ctx: Context) -> Result<Response, Error> {
+    let r: Request = serde_json::from_str(&event.body)?;
+    let command = r.command;
 
     let resp = Response {
-        req_id: ctx.request_id,
-        msg: format!("Command {} executed.", command),
+        statusCode: "200".to_string(),
+        body: format!("Command {} executed.", command),
     };
 
     Ok(resp)
@@ -217,7 +224,8 @@ add `aws-cdk.aws-lambda==X.YY.ZZ` to `setup.py` within `install_requires` sectio
 ```python
     install_requires=[
         "aws-cdk.core==1.107.0",
-        "aws-cdk.aws-lambda==1.107.0"
+        "aws-cdk.aws-lambda==1.107.0",
+        "aws-cdk.aws-apigateway==1.107.0"
     ],
 ```
 
@@ -228,6 +236,7 @@ Update the `project01_stack.py` file to create a Lambda Function.
 ```python
 from aws_cdk import core as cdk
 import aws_cdk.aws_lambda as lambda_
+import aws_cdk.aws_apigateway as apigw
 
 class Project01Stack(cdk.Stack):
 
@@ -240,6 +249,7 @@ class Project01Stack(cdk.Stack):
             handler="index.main",
             runtime=lambda_.Runtime.PROVIDED_AL2,
         )
+        apigw.LambdaRestApi(self, "MyAPI", handler=function_reference)
 ```
 
 Note that the `code` parameter is `lambda_.Code.from_asset('./my-example-function/out')`, which means that we're telling CDK to grab the contents of a directory, zip it up, and use that as the function's 'code artifact'.
@@ -251,3 +261,52 @@ now we're ready to run `cdk synth` (to see the synthesized CloudFormation stack)
 ```bash
 cdk deploy
 ```
+
+You may be prompted to bootstrap the account if the deploy command fails with the following message
+```text
+Do you wish to deploy these changes (y/n)? y
+Project01Stack: deploying...
+
+ ❌  Project01Stack failed: Error: This stack uses assets, so the toolkit stack must be deployed to the environment (Run "cdk bootstrap aws://unknown-account/unknown-region")
+This stack uses assets, so the toolkit stack must be deployed to the environment (Run "cdk bootstrap aws://unknown-account/unknown-region")
+```
+
+This can be fixed by running `cdk bootstrap`
+
+```text
+(.venv) Feder08:~/environment/project01 (master) $ cdk bootstrap
+ ⏳  Bootstrapping environment aws://537434832053/us-west-2...
+CDKToolkit: creating CloudFormation changeset...
+
+ ✅  Environment aws://537434832053/us-west-2 bootstrapped.
+```
+
+Now you can run `cdk deploy` again.
+
+```text
+(.venv) Feder08:~/environment/project01 (master) $ cdk deploy
+Project01Stack: deploying...
+[0%] start: Publishing 4475c6df3f48a28fa9f1799b61a5de7e2472ed14a37b661e38c1d7620bf3ba94:current
+[100%] success: Published 4475c6df3f48a28fa9f1799b61a5de7e2472ed14a37b661e38c1d7620bf3ba94:current
+Project01Stack: creating CloudFormation changeset...
+
+
+
+
+
+ ✅  Project01Stack
+
+Outputs:
+Project01Stack.MyAPIEndpoint3D9AE6B4 = https://gq36b3n519.execute-api.us-west-2.amazonaws.com/prod/
+
+Stack ARN:
+arn:aws:cloudformation:us-west-2:537434832053:stack/Project01Stack/78442d90-e058-11eb-b9ae-06355f45545d
+```
+
+The `Outputs:` section tells you the API Gateway URL and the Rust Function can be tested with
+
+```bash
+curl -d '{"command":"test"}' https://gq36b3n519.execute-api.us-west-2.amazonaws.com/prod/
+```
+
+Remember to substitute the URL that you get as a response from the `cdk deploy` command.
