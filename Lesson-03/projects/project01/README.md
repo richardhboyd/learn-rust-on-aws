@@ -210,7 +210,7 @@ pub(crate) async fn my_handler(event: APIRequest, ctx: Context) -> Result<Respon
 
 Now we'll build this binary with the following command:
 
-`cargo +nightly build --release --out-dir=out -Z unstable-options`
+`cargo +nightly build --release --out-dir=out -Z unstable-options --manifest-path ./my-example-function/Cargo.toml `
 
 This will place all of the build artifacts in the usual `target/release/` directory, but it will also copy just the binary to a directory named `out/`.
 This will be important for the later CDK step.
@@ -229,10 +229,9 @@ add `aws-cdk.aws-lambda==X.YY.ZZ` to `setup.py` within `install_requires` sectio
     ],
 ```
 
-return to the root of the project and install the Python dependencies
+Install the Python dependencies
 
 ```text
-cd ..
 pip install -r ./requirements.txt
 ```
 
