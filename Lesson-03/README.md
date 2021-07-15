@@ -2,7 +2,7 @@
 
 ## Readings
 
-- AWS CloudDeveloper Kit
+- [AWS Cloud Development Kit](https://aws.amazon.com/cdk/)
 
 ## Homework
 
