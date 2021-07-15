@@ -229,7 +229,12 @@ add `aws-cdk.aws-lambda==X.YY.ZZ` to `setup.py` within `install_requires` sectio
     ],
 ```
 
-run ` pip install -r ./requirements.txt ` to install dependencies.
+return to the root of the project and install the Python dependencies
+
+```text
+cd ..
+pip install -r ./requirements.txt
+```
 
 Update the `project01_stack.py` file to create a Lambda Function.
 
