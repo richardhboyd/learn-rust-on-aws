@@ -1,4 +1,4 @@
-# Project 3 - A Ridiculous Stretch Goal
+# Project 02.03 - A Ridiculous Stretch Goal
 
 Okay, this project uses my favorite feature of API Gateway and it's one that not too many people know how to use.
 I'm giving you access to a super secret API that nobody is supposed to know about.

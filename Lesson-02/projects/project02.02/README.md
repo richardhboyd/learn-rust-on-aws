@@ -1,4 +1,4 @@
-# Project 2 - Adding IAM Permissions
+# Project 02.02 - Adding IAM Permissions
 
 This project will pick up where the previous project left off.
 We finished Project 1 with a Lambda function that will return a hardcoded response for any request.

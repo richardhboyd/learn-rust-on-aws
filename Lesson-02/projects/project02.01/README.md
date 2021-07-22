@@ -1,4 +1,4 @@
-# Project 1 - Just the Basics
+# Project 02.01 - Just the Basics
 
 Create a SAM application that consists of an API Gateway REST API that proxies all requests to a single Lambda function.
 This function should return the following json response `{"hello": "world"}`
