@@ -121,6 +121,7 @@ From the root of the project, run `cargo new my-example-function` to create a fo
 Running this command form the root of the project will replace the contents of `Cargo.toml` with the appropriate dependencies.
 ```bash
 cat << EOF > my-example-function/Cargo.toml
+cargo-features = ["edition2021"]
 [package]
 name = "my-example-function"
 version = "0.1.0"
